@@ -12,7 +12,7 @@ How the app works, end to end. Written so you can walk someone through it confid
 | Frontend | Vanilla JS + HTML + CSS | No build step, no framework dependency, ships as static files |
 | Database | SQLite with WAL mode | Single-file DB, WAL allows concurrent reads during writes |
 | Streaming | Server-Sent Events (SSE) | One-way server-to-client stream, simpler than WebSockets for this use case |
-| AI Clients | OpenAI Python SDK | The API gateway and Ollama both expose OpenAI-compatible endpoints |
+| AI Clients | OpenAI Python SDK | Works with any OpenAI-compatible endpoint (LiteLLM, Ollama, direct API, etc.) |
 | Container | Docker (python:3.12-slim) | Consistent deployment, single `docker compose up` |
 | Config | YAML (models.yaml) | Add/remove models and providers without touching code |
 
@@ -89,7 +89,7 @@ After voting, the backend returns both model identities, latency, token counts, 
 
 ## Key Design Decisions
 
-**OpenAI-compatible client for everything.** The API gateway and Ollama both speak the OpenAI API format. This means one client library (`openai` Python SDK) talks to all providers. Adding a new provider just means a new entry in `models.yaml` with a `base_url`.
+**OpenAI-compatible client for everything.** Any OpenAI-compatible endpoint works — LiteLLM, Ollama, direct API access, or a self-hosted gateway. One client library (`openai` Python SDK) talks to all providers. Adding a new provider is just a new entry in `models.yaml` with a `base_url`.
 
 **Config-driven models.** `models.yaml` defines providers (endpoints + API keys) and models (which provider, cost, categories). No code changes needed to add or remove models.
 
@@ -139,8 +139,7 @@ If this ever moved beyond proof-of-concept:
 
 1. **Authentication** — OAuth or API key per user, not open access
 2. **Rate limiting** — Already added (see above), but would want persistent storage (Redis) at scale
-3. **HTTPS** — Tailscale Funnel handles this now, but a real deploy needs proper certs
+3. **HTTPS** — Any reverse proxy works (nginx, Caddy, Cloudflare Tunnel). Auth cookies require HTTPS; localhost is exempt.
 4. **Database** — SQLite works great for single-server, but PostgreSQL for multi-instance
-5. **Tests** — Unit tests for ELO math, integration tests for battle flow
-6. **Observability** — Structured logging, request tracing, cost dashboards
-7. **Input sanitization** — XSS protection on rendered markdown (currently trusts marked.js defaults)
+5. **Observability** — Structured logging, request tracing, cost dashboards
+6. **SSO** — Passphrase auth is fine for small teams; larger deployments would want OAuth or SAML
