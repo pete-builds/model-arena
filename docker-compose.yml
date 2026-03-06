@@ -9,5 +9,7 @@ services:
       - ./data:/app/data
       - ./models.yaml:/app/models.yaml:ro
     environment:
+      - ARENA_PASSPHRASE=${ARENA_PASSPHRASE}
+      - AUTH_TOKEN_SECRET=${AUTH_TOKEN_SECRET}
       - GATEWAY_API_KEY=${GATEWAY_API_KEY}
       - TZ=${TZ:-America/New_York}

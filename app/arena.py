@@ -19,8 +19,9 @@ def select_models(config: Config, category: str) -> tuple[Model, Model]:
     random.shuffle(candidates)
 
     # Try to ensure at least one gateway model
-    gateway = [m for m in candidates if m.provider_name != "ollama-mac"]
-    local = [m for m in candidates if m.provider_name == "ollama-mac"]
+    local_providers = {name for name, p in config.providers.items() if p.local}
+    gateway = [m for m in candidates if m.provider_name not in local_providers]
+    local = [m for m in candidates if m.provider_name in local_providers]
 
     if len(gateway) >= 1 and len(local) >= 1 and random.random() < 0.4:
         # 40% chance to include a local model

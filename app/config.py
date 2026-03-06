@@ -14,6 +14,7 @@ class Provider:
     api_key: str
     request_surcharge: float = 0.0
     timeout: int = 30
+    local: bool = False
 
 
 @dataclass
@@ -64,6 +65,7 @@ def load_config(path: str = "models.yaml") -> Config:
             api_key=api_key,
             request_surcharge=prov.get("request_surcharge", 0.0),
             timeout=prov.get("timeout", 30),
+            local=prov.get("local", False),
         )
 
     models = []

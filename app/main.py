@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import hmac
+import io
 import os
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse, FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import StreamingResponse, FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel as PydanticBaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -315,8 +317,6 @@ async def export_battles(format: str = "csv"):
         )
 
     # CSV
-    import csv
-    import io
     output = io.StringIO()
     if battles:
         fields = ["id", "prompt", "category", "model_a", "model_a_name", "model_b", "model_b_name",
@@ -326,7 +326,6 @@ async def export_battles(format: str = "csv"):
         writer.writeheader()
         writer.writerows(battles)
 
-    from starlette.responses import Response
     return Response(
         content=output.getvalue(),
         media_type="text/csv",

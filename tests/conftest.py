@@ -31,6 +31,7 @@ def test_config():
             api_key="",
             request_surcharge=0.0,
             timeout=60,
+            local=True,
         ),
     }
     models = [

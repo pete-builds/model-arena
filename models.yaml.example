@@ -17,6 +17,7 @@ providers:
     api_key: "ollama"                    # Ollama accepts any string
     request_surcharge: 0.0
     timeout: 120                         # local models can be slower
+    local: true                          # prevents pairing two local models
 
   # Example: LiteLLM proxy / custom gateway
   # gateway:
