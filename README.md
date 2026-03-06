@@ -11,6 +11,7 @@ Inspired by [Chatbot Arena](https://lmarena.ai/) (LMSYS), built for teams who wa
 ## Why Model Arena?
 
 - **Blind comparison** — Models are hidden until after you vote, so the response speaks for itself
+- **Targeted comparison** — Skip the mystery match and pick two specific models to go head to head
 - **Your models, your prompts** — Connect any OpenAI-compatible API (OpenAI, Anthropic via proxy, Ollama, LiteLLM, etc.)
 - **One command deploy** — `docker compose up` and you're running
 - **YAML config** — Add or swap models without touching code
