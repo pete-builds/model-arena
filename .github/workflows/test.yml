@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Set up test config
+        run: cp models.yaml.example models.yaml
+
       - name: Run tests
         env:
           ARENA_PASSPHRASE: test-passphrase
