@@ -40,10 +40,15 @@ Inspired by [Chatbot Arena](https://lmarena.ai/) (LMSYS), built for teams who wa
 ## Quick Start
 
 ```bash
-# Copy the example config
+# Copy the example configs
 cp models.yaml.example models.yaml
+cp .env.example .env
 
 # Edit models.yaml with your API endpoints and keys
+# Edit .env with a passphrase and a random token secret:
+#   ARENA_PASSPHRASE=your-secret-phrase
+#   AUTH_TOKEN_SECRET=$(openssl rand -hex 32)
+
 # Then start:
 docker compose up -d
 ```
@@ -58,9 +63,14 @@ Auth cookies are set with `Secure=True`, which requires HTTPS. This works automa
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `YOUR_API_KEY` | _(empty)_ | API key for your primary gateway provider |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ARENA_PASSPHRASE` | Yes | Passphrase users enter to access the arena |
+| `AUTH_TOKEN_SECRET` | Yes | Secret key for signing auth tokens (`openssl rand -hex 32`) |
+| `GATEWAY_API_KEY` | No | API key for your gateway provider (referenced in `models.yaml` via `api_key_env`) |
+| `TZ` | No | Timezone for "battles today" stat (default: `America/New_York`) |
+
+See `.env.example` for a ready-to-copy template. The app will refuse to start without `ARENA_PASSPHRASE` and `AUTH_TOKEN_SECRET`.
 
 ### models.yaml
 
