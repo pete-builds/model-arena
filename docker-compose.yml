@@ -10,3 +10,4 @@ services:
       - ./models.yaml:/app/models.yaml:ro
     environment:
       - GATEWAY_API_KEY=${GATEWAY_API_KEY}
+      - TZ=${TZ:-America/New_York}

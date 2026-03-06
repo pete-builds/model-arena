@@ -232,7 +232,7 @@ class Store:
         voted_row = await voted.fetchone()
 
         today = await self.db.execute(
-            "SELECT COUNT(*) as c FROM battles WHERE created_at >= date('now')"
+            "SELECT COUNT(*) as c FROM battles WHERE created_at >= date('now', 'localtime')"
         )
         today_row = await today.fetchone()
 
