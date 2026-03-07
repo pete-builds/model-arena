@@ -4,17 +4,25 @@
 
 **Bring your own models. Run blind battles.**
 
-Run blind side-by-side comparisons across any combination of AI models on your own infrastructure. Cloud APIs, local models, internal gateways -- whatever speaks OpenAI-compatible. You pick the prompts. You own the data. ELO rankings track which models actually perform for your use cases.
+If you're running your own AI stack -- Ollama on a Mac Mini, models on a GPU server, llama.cpp on bare metal, vLLM in a container -- you've probably wondered how your local models actually compare to the cloud APIs you're paying for. Open Model Arena gives you a way to find out.
+
+Two models get the same prompt. You read both responses without knowing which model wrote which. You vote. ELO rankings track the results over time. That's it.
+
+## Who is this for?
+
+- **Homelab and self-hosted AI users** running Ollama, LM Studio, vLLM, or LocalAI who want to benchmark their models against cloud APIs
+- **Teams evaluating models** for internal use who need blind comparisons on their own prompts, not public benchmarks
+- **Anyone with an OpenAI-compatible endpoint** -- cloud providers, local inference, API gateways, proxies, or a mix of all of them
 
 ## How is this different?
 
-Public model leaderboards test their models with their prompts on their infrastructure. You get rankings, but they don't reflect how models perform on *your* workloads, with *your* data, through *your* API setup.
+Public leaderboards test their models with their prompts on their hardware. Those rankings don't tell you how Mistral 7B running on your Mac Mini compares to GPT-4o for the prompts your team actually uses.
 
-Open Model Arena flips that. You bring the models, you write the prompts, and the blind evaluation removes the bias of knowing which model you're reading. It runs on your hardware, behind your firewall, with your API keys.
+Open Model Arena runs on your infrastructure. You bring whatever models you have -- a $0 local model running on a Raspberry Pi and a $15/million-token cloud API get the same blind evaluation. The results reflect your workloads, not a synthetic benchmark.
 
-- Connect **any OpenAI-compatible endpoint**: OpenAI, Anthropic (via proxy), Google, Ollama, LM Studio, vLLM, LiteLLM, or your org's internal gateway
-- Run it on a **Raspberry Pi, a NAS, a VM, or a cloud instance** -- it's FastAPI + SQLite, not a distributed system
-- **No data leaves your network** unless you're calling cloud APIs
+- **Any OpenAI-compatible endpoint**: OpenAI, Anthropic (via proxy), Google, Ollama, LM Studio, vLLM, LiteLLM, LocalAI, or your org's internal gateway
+- **Runs anywhere**: a Mac Mini, a NAS, a Linux box, a VM, a cloud instance -- it's FastAPI + SQLite, not a distributed system
+- **Your data stays yours** -- nothing leaves your network unless you're calling cloud APIs
 - **YAML config** -- add or swap models without touching code
 
 ## Screenshots
