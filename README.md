@@ -12,6 +12,8 @@ Two models get the same prompt. You read both responses without knowing which mo
 
 **What makes this different from public leaderboards:** those benchmarks test their models with their prompts on their hardware. They don't tell you how Mistral 7B running on your Mac Mini compares to GPT-4o for the prompts your team actually uses. Open Model Arena runs on your infrastructure, with your models, your prompts, and your data. A $0 local model and a $15/million-token cloud API get the same blind evaluation.
 
+**How is this different from Chatbot Arena?** [Chatbot Arena](https://lmarena.ai/) (LMSYS) is a research platform that published its code. Running it yourself means installing FastChat, Gradio, and a full inference serving framework. It's designed to serve models, not connect to ones you already have. Open Model Arena is a self-hosted tool designed to be deployed. One Docker container, one YAML file, no inference framework required. If your models are already running on Ollama, behind an API, or through a gateway, you're five minutes from your first blind battle.
+
 ## Who is this for?
 
 - **Homelab and self-hosted AI users** running Ollama, LM Studio, vLLM, or LocalAI who want to benchmark their local models against cloud APIs
