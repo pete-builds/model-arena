@@ -4,58 +4,40 @@
 
 **Bring your own models. Run blind battles.**
 
+![Arena](docs/screenshots/arena.png)
+
 If you're running your own AI stack -- Ollama on a Mac Mini, models on a GPU server, llama.cpp on bare metal, vLLM in a container -- you've probably wondered how your local models actually compare to the cloud APIs you're paying for. Open Model Arena gives you a way to find out.
 
 Two models get the same prompt. You read both responses without knowing which model wrote which. You vote. ELO rankings track the results over time. That's it.
 
+**What makes this different from public leaderboards:** those benchmarks test their models with their prompts on their hardware. They don't tell you how Mistral 7B running on your Mac Mini compares to GPT-4o for the prompts your team actually uses. Open Model Arena runs on your infrastructure, with your models, your prompts, and your data. A $0 local model and a $15/million-token cloud API get the same blind evaluation.
+
 ## Who is this for?
 
-- **Homelab and self-hosted AI users** running Ollama, LM Studio, vLLM, or LocalAI who want to benchmark their models against cloud APIs
+- **Homelab and self-hosted AI users** running Ollama, LM Studio, vLLM, or LocalAI who want to benchmark their local models against cloud APIs
 - **Teams evaluating models** for internal use who need blind comparisons on their own prompts, not public benchmarks
 - **Anyone with an OpenAI-compatible endpoint** -- cloud providers, local inference, API gateways, proxies, or a mix of all of them
 
-## How is this different?
-
-Public leaderboards test their models with their prompts on their hardware. Those rankings don't tell you how Mistral 7B running on your Mac Mini compares to GPT-4o for the prompts your team actually uses.
-
-Open Model Arena runs on your infrastructure. You bring whatever models you have -- a $0 local model running on a Raspberry Pi and a $15/million-token cloud API get the same blind evaluation. The results reflect your workloads, not a synthetic benchmark.
-
-- **Any OpenAI-compatible endpoint**: OpenAI, Anthropic (via proxy), Google, Ollama, LM Studio, vLLM, LiteLLM, LocalAI, or your org's internal gateway
-- **Runs anywhere**: a Mac Mini, a NAS, a Linux box, a VM, a cloud instance -- it's FastAPI + SQLite, not a distributed system
-- **Your data stays yours** -- nothing leaves your network unless you're calling cloud APIs
-- **YAML config** -- add or swap models without touching code
-
-## Screenshots
-
-![Arena](docs/screenshots/arena.png)
-
 ## Features
 
-- **Blind comparison** -- models are hidden until after you vote
-- **Targeted comparison** -- pick two specific models to go head-to-head
+**The core:**
+- **Blind comparison** -- models are hidden until after you vote, so the response speaks for itself
+- **Targeted comparison** -- skip the mystery match and pick two specific models to go head-to-head
 - **Real-time streaming** -- both responses stream simultaneously via Server-Sent Events
-- **ELO leaderboard** -- standard ELO rating system (K=32), filterable by category
-- **Category support** -- general, coding, reasoning, creative
-- **Cost tracking** -- per-response cost estimates based on model pricing config
-- **Vote audit log** -- full history with before/after ELO for every vote
-- **Markdown rendering** -- responses rendered with syntax highlighting
-- **Prompt templates** -- save and reuse prompts from localStorage
-- **Battle export** -- download battle history as CSV or JSON
-- **Dark/light theme** -- toggle persists across sessions
+- **ELO leaderboard** -- standard rating system (K=32), filterable by category, with provisional thresholds
 
-## How It Works
-
-1. Enter a prompt and select a category
-2. Two models are randomly selected (configurable rules prevent unfair pairings)
-3. Both models receive the prompt and stream responses side-by-side
-4. Vote: **A Wins**, **Tie**, or **B Wins**
-5. Models are revealed with latency, token count, cost, and ELO change
-6. Leaderboard tracks cumulative performance
+**Everything else:**
+- Category support (general, coding, reasoning, creative)
+- Per-response cost tracking based on model pricing config
+- Vote audit log with before/after ELO for every vote
+- Markdown rendering with syntax highlighting
+- Prompt templates saved to localStorage
+- Battle export (CSV or JSON)
+- Dark/light theme
 
 ## Quick Start
 
 ```bash
-# Clone and configure
 git clone https://github.com/pete-builds/open-model-arena.git
 cd open-model-arena
 cp models.yaml.example models.yaml
@@ -66,32 +48,18 @@ cp .env.example .env
 #   ARENA_PASSPHRASE=your-secret-phrase
 #   AUTH_TOKEN_SECRET=$(openssl rand -hex 32)
 
-# Start
 docker compose up -d
 ```
 
 Open `http://localhost:3694`
 
-### HTTPS Note
-
-Auth cookies are set with `Secure=True`, which requires HTTPS. This works automatically on `localhost` (browsers treat it as secure). For remote access, put the app behind any HTTPS-capable reverse proxy (nginx, Caddy, Cloudflare Tunnel, Tailscale Funnel, etc.).
+**HTTPS note:** Auth cookies use `Secure=True`, which requires HTTPS. This works automatically on `localhost`. For remote access, use any HTTPS-capable reverse proxy (nginx, Caddy, Cloudflare Tunnel, Tailscale Funnel, etc.).
 
 ## Configuration
 
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ARENA_PASSPHRASE` | Yes | Passphrase users enter to access the arena |
-| `AUTH_TOKEN_SECRET` | Yes | Secret key for signing auth tokens (`openssl rand -hex 32`) |
-| `GATEWAY_API_KEY` | No | API key for your gateway provider (referenced in `models.yaml` via `api_key_env`) |
-| `TZ` | No | Timezone for "battles today" stat (default: `America/New_York`) |
-
-See `.env.example` for a ready-to-copy template. The app will refuse to start without `ARENA_PASSPHRASE` and `AUTH_TOKEN_SECRET`.
-
 ### models.yaml
 
-The model registry is a YAML file that defines providers and models. See `models.yaml.example` for the full format.
+Define your providers and models in YAML. See `models.yaml.example` for the full format.
 
 ```yaml
 providers:
@@ -117,18 +85,22 @@ models:
     enabled: true
 ```
 
-**Key points:**
 - `api_key_env` reads the key from an environment variable (recommended)
 - `api_key` sets the key directly (for local services like Ollama)
-- `model_id` is what gets sent in the API request
 - `categories` controls which battles a model can appear in
 - Set `enabled: false` to temporarily remove a model
+- Models are randomly paired; the system avoids pairing two local models together
 
-### Model Selection Rules
+### Environment Variables
 
-- Models are randomly paired from the selected category
-- The system avoids pairing two local (Ollama) models together
-- Position (A vs B) is randomized to prevent position bias
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ARENA_PASSPHRASE` | Yes | Passphrase users enter to access the arena |
+| `AUTH_TOKEN_SECRET` | Yes | Secret key for signing auth tokens (`openssl rand -hex 32`) |
+| `GATEWAY_API_KEY` | No | API key for your gateway provider |
+| `TZ` | No | Timezone for "battles today" stat (default: `America/New_York`) |
+
+The app will refuse to start without `ARENA_PASSPHRASE` and `AUTH_TOKEN_SECRET`.
 
 ## Tech Stack
 
@@ -143,22 +115,13 @@ models:
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/battle` | `{"prompt": "...", "category": "general"}` |
-| `GET` | `/api/battle/{id}/stream` | SSE stream with model events |
-| `POST` | `/api/battle/{id}/vote` | `{"winner": "a\|b\|tie"}` |
+| `POST` | `/api/battle` | Start a battle |
+| `GET` | `/api/battle/{id}/stream` | SSE stream |
+| `POST` | `/api/battle/{id}/vote` | Cast a vote |
 | `GET` | `/api/leaderboard?category=overall` | ELO rankings |
-| `GET` | `/api/stats` | Battle counts |
 | `GET` | `/api/models` | List enabled models |
 | `GET` | `/api/export?format=csv` | Download battle history |
 | `GET` | `/healthz` | Health check |
-
-## ELO System
-
-- Starting rating: 1500
-- K-factor: 32
-- Ratings tracked per-category and overall
-- Ties award 0.5 score to each model
-- Provisional threshold: minimum 5 battles before ranked
 
 ## Prior Art
 
