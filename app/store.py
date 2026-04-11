@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import logging
 import secrets
 import string
 
 import aiosqlite
+
+from .errors import StoreError
+
+log = logging.getLogger("arena.store")
 
 DB_PATH = "data/arena.db"
 
@@ -64,11 +69,15 @@ class Store:
         self.db: aiosqlite.Connection | None = None
 
     async def connect(self):
-        self.db = await aiosqlite.connect(self.db_path)
-        self.db.row_factory = aiosqlite.Row
-        await self.db.execute("PRAGMA journal_mode=WAL")
-        await self.db.executescript(SCHEMA)
-        await self.db.commit()
+        try:
+            self.db = await aiosqlite.connect(self.db_path)
+            self.db.row_factory = aiosqlite.Row
+            await self.db.execute("PRAGMA journal_mode=WAL")
+            await self.db.executescript(SCHEMA)
+            await self.db.commit()
+            log.info("database connected: %s", self.db_path)
+        except Exception as e:
+            raise StoreError(f"failed to connect to database at {self.db_path}: {e}") from e
 
     async def close(self):
         if self.db:

@@ -4,6 +4,7 @@ import csv
 import hashlib
 import hmac
 import io
+import logging
 import os
 import re
 import secrets
@@ -20,6 +21,13 @@ from .config import load_config
 from .models import BattleRequest, VoteRequest
 from .ratelimit import RateLimiter
 from .store import Store
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
+log = logging.getLogger("arena")
 
 config = load_config()
 store = Store()

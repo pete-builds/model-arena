@@ -1,5 +1,9 @@
 """Tests for config loading and model lookups."""
 
+import pytest
+
+from app.config import load_config
+from app.errors import ConfigError
 
 
 def test_get_model(test_config):
@@ -31,3 +35,57 @@ def test_get_provider(test_config):
     provider = test_config.get_provider("test-gateway")
     assert provider.base_url == "http://fake:8080/v1"
     assert provider.request_surcharge == 0.002
+
+
+def test_load_config_file_not_found():
+    with pytest.raises(ConfigError, match="config file not found"):
+        load_config("/nonexistent/path.yaml")
+
+
+def test_load_config_invalid_yaml(tmp_path):
+    bad = tmp_path / "bad.yaml"
+    bad.write_text("{{not valid yaml")
+    with pytest.raises(ConfigError, match="invalid YAML"):
+        load_config(str(bad))
+
+
+def test_load_config_missing_sections(tmp_path):
+    empty = tmp_path / "empty.yaml"
+    empty.write_text("foo: bar\n")
+    with pytest.raises(ConfigError, match="must contain"):
+        load_config(str(empty))
+
+
+def test_load_config_unknown_provider(tmp_path):
+    cfg = tmp_path / "bad_ref.yaml"
+    cfg.write_text("""
+providers:
+  gw:
+    base_url: http://test/v1
+    api_key: k
+models:
+  - id: m1
+    provider: nonexistent
+    display_name: M1
+    model_id: m1
+""")
+    with pytest.raises(ConfigError, match="unknown provider"):
+        load_config(str(cfg))
+
+
+def test_load_config_valid(tmp_path):
+    cfg = tmp_path / "good.yaml"
+    cfg.write_text("""
+providers:
+  gw:
+    base_url: http://test/v1
+    api_key: testkey
+models:
+  - id: m1
+    provider: gw
+    display_name: Model One
+    model_id: m1-v1
+""")
+    config = load_config(str(cfg))
+    assert len(config.models) == 1
+    assert config.get_model("m1").display_name == "Model One"

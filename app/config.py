@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass, field
 
 import yaml
+
+from .errors import ConfigError
+
+log = logging.getLogger("arena.config")
 
 
 @dataclass
@@ -50,8 +55,16 @@ class Config:
 
 
 def load_config(path: str = "models.yaml") -> Config:
-    with open(path) as f:
-        raw = yaml.safe_load(f)
+    try:
+        with open(path) as f:
+            raw = yaml.safe_load(f)
+    except FileNotFoundError:
+        raise ConfigError(f"config file not found: {path}")
+    except yaml.YAMLError as e:
+        raise ConfigError(f"invalid YAML in {path}: {e}")
+
+    if not raw or "providers" not in raw or "models" not in raw:
+        raise ConfigError(f"config file {path} must contain 'providers' and 'models' sections")
 
     providers = {}
     for name, prov in raw["providers"].items():
@@ -69,6 +82,8 @@ def load_config(path: str = "models.yaml") -> Config:
 
     models = []
     for m in raw["models"]:
+        if m.get("provider") not in providers:
+            raise ConfigError(f"model '{m.get('id')}' references unknown provider '{m.get('provider')}'")
         models.append(Model(
             id=m["id"],
             provider_name=m["provider"],
@@ -80,4 +95,6 @@ def load_config(path: str = "models.yaml") -> Config:
             enabled=m.get("enabled", True),
         ))
 
+    log.info("loaded %d providers, %d models (%d enabled)", len(providers), len(models),
+             sum(1 for m in models if m.enabled))
     return Config(providers=providers, models=models)
